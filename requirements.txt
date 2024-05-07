@@ -1,0 +1,8 @@
+torch
+einops
+kornia
+numpy
+open3d
+python-opencv
+hydra-core
+term_color

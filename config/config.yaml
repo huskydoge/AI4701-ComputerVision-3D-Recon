@@ -1,0 +1,37 @@
+GLOB:
+  intrinsic_path: camera_intrinsic.txt
+  world_cam_path: images/0000.png
+  save_dir: output
+
+RECON_INIT:
+  camera_paths: [images/0000.png, images/0001.png]
+
+RECON:
+  method: epipolar # pnp or epipolar
+  visualize: True
+  merge_3d: False
+  normalize_epi: True # whether scale the transition vector derived from epipolar, 否则会有尺度问题
+
+ESTIMATOR:
+  alg: ransac # ransac, magsac, use in findEssentialMat, findFundamentalMat, not in match
+  ransac_params:
+    ransacReprojThreshold: 0.1
+    confidence: 0.99
+  extract:
+    contrast_thresh: 0.001 # Threshold for keypoint selection based on contrast. Lower values increase feature count but reduce stability.
+    edge_thresh: 10 # Threshold for eliminating edge responses in keypoints, lower value tends to ignore more features near edges, thereby reducing mismatches caused by edges
+    sigma: 1.6
+  match:
+    thres: 0.5
+    alg: None # ransac, magsac, None
+    ransac_params:
+      ransacReprojThreshold: 10
+      confidence: 0.99
+    tree: 7 # 配置索引，密度树的数量为5
+    checks: 50 # 指定递归次数
+    flan_k: 2 # 最近邻的数量，=2,表示寻找两个最近邻，一般不动
+
+BA:
+  least_square_params:
+    method: trf # trf or lm
+    ftol: 1e-8
