@@ -2,7 +2,7 @@
 Author: huskydoge hbh001098hbh@sjtu.edu.cn
 Date: 2024-04-19 19:18:47
 LastEditors: huskydoge hbh001098hbh@sjtu.edu.cn
-LastEditTime: 2024-05-07 20:59:55
+LastEditTime: 2024-05-07 21:38:37
 FilePath: /code/utils.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -120,7 +120,6 @@ def save_r_t(r, t, path):
     
     np.savetxt(path, matrix, fmt="%f")
     
-# 创建相机网格模型
 def create_camera_mesh(color = None):
     mesh = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.5, origin=[0, 0, 0])
     if color is not None:
@@ -135,23 +134,9 @@ def visualize_point_cloud(points_3d, r_list, t_list, pcolors=None, view_params =
     print_colored("Number of camera poses: {}".format(len(r_list)), "green")
     print_colored("========================================", "green")
     
-
-    # if view_params == None:
-    #     import json
-    #     with open("src/view.json", "r") as f:
-    #         view_params = json.load(f)["trajectory"][0]
-            
-        
-
-    # # 绕z轴旋转180
-    # points_3d[:, 0] = - points_3d[:, 0]
-    # points_3d[:, 1] = - points_3d[:, 1]
-    
-
     vis = o3d.visualization.Visualizer()
     vis.create_window(window_name="3D Recon", height=1000, width = 2000)    
 
-    # points_3d[:,1] = -points_3d[:,1]  # Y轴反转
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points_3d)  
     
@@ -201,57 +186,14 @@ def visualize_point_cloud(points_3d, r_list, t_list, pcolors=None, view_params =
         )
         line_set.colors = o3d.utility.Vector3dVector(np.array(colors))
         return line_set
-    
-    # 设置初始视角
-    view_control = vis.get_view_control()
-    # cam_params = view_control.convert_to_pinhole_camera_parameters()
 
-    # # 计算点云中心
-    # center = pcd.get_center()
-
-    # # 设置相机位置，假设点云沿Z轴较扁平，相机应从Y轴方向观察
-    # cam_params.extrinsic = np.array([
-    #     [1, 0, 0, 0],
-    #     [0, 1, 0, 2],  # 假设相机在点云上方2单位距离
-    #     [0, 0, 1, center[2]],
-    #     [0, 0, 0, 1]
-    # ])
-
-    # view_control.convert_from_pinhole_camera_parameters(cam_params)
-
-    grid = create_grid(np.array([0, -0.1, 0]), size=100, n=1000)  # 'size' 是网格的间距，'n' 是网格线的数量
+    grid = create_grid(np.array([0, -0.1, 0]), size=100, n=1000)  # 'size' is the gap between grid，'n' is the number of grid
     vis.add_geometry(grid)
 
     vis.add_geometry(pcd)
-    
-    # if view_params:
-    #     view_ctl = vis.get_view_control()
-    #     cam_params = view_ctl.convert_to_pinhole_camera_parameters()
-        
-    #     # Extrinsic settings based on view_params
-    #     cam_params.extrinsic = np.array([
-    #         [view_params['front'][0], view_params['up'][0], np.cross(view_params['front'], view_params['up'])[0], view_params['lookat'][0]],
-    #         [view_params['front'][1], view_params['up'][1], np.cross(view_params['front'], view_params['up'])[1], view_params['lookat'][1]],
-    #         [view_params['front'][2], view_params['up'][2], np.cross(view_params['front'], view_params['up'])[2], view_params['lookat'][2]],
-    #         [0, 0, 0, 1]
-    #     ]).T  # Adjusting the matrix as Open3D expects rotation vectors in columns
-
-    #     view_ctl.convert_from_pinhole_camera_parameters(cam_params)
-    param = o3d.io.read_pinhole_camera_parameters("src/view.json")
-
-
-    #ctr.convert_from_pinhole_camera_parameters(param)
-    
-    vis.get_view_control().convert_from_pinhole_camera_parameters(param)
-    
 
     vis.run()
     vis.destroy_window()
-
-
-def compare_two_results(points_3d_1, points_3d_2, r_list_1, r_list_2, t_list_1, t_list_2):
-    "TODO Compare two sets of point clouds and camera poses. Add a button to switch between the two sets. Make different colors for the two sets of point clouds."
-
 
 def wrapped_up_visualize(data_path):
         
@@ -357,7 +299,6 @@ def get_diff_between_cameras(path1, path2):
         cam_1 = camera_list_1[i]
         cam_2 = camera_list_2[i]
 
-        # rotation_diff = (np.linalg.norm(np.eye(3,3) - cam_1[:3, :3] @ cam_2[:3, :3].T))
         rotation_diff = cam_1[:3, :3] @ cam_2[:3, :3].T
 
         rotation_diffs.append(np.linalg.norm(rotation_diff - np.eye(3,3) / np.linalg.norm(np.eye(3,3))))
@@ -369,8 +310,6 @@ def get_diff_between_cameras(path1, path2):
         angular_diffs.append(angular_distance)
         t_diffs.append(t_diff)
         
-
-
     # Create a figure
     fig = plt.figure(figsize=(12, 6))
 
@@ -403,7 +342,6 @@ def get_diff_between_cameras(path1, path2):
     
 def compare_cams(r_list_1, t_list_1, r_list_2, t_list_2):
     
-
     vis = o3d.visualization.Visualizer()
     vis.create_window(window_name="3D Recon", height=1000, width = 2000)    
     
@@ -456,73 +394,29 @@ def compare_cams(r_list_1, t_list_1, r_list_2, t_list_2):
 
 
 
-    grid = create_grid(np.array([0, -0.1, 0]), size=100, n=1000)  # 'size' 是网格的间距，'n' 是网格线的数量
+    grid = create_grid(np.array([0, -0.1, 0]), size=100, n=1000) 
     vis.add_geometry(grid)
-
-
-    param = o3d.io.read_pinhole_camera_parameters("src/view.json")
-
-
-    #ctr.convert_from_pinhole_camera_parameters(param)
-    
-    vis.get_view_control().convert_from_pinhole_camera_parameters(param)
-    
 
     vis.run()
     vis.destroy_window()
         
     
 if __name__ == "__main__":
-    # import os
-    # # get r and t
-    # path = "camera_pose"
-    # r_list = []
-    # t_list = []
-    # for pose in os.listdir(path):
-    #     r_t = np.loadtxt(os.path.join(path, pose))
-    #     r = r_t[:3, :3]
-    #     print(r)
-    #     t = r_t[:3, 3].reshape(3, 1)
-    #     print(t)
-    #     r_list.append(r)
-    #     t_list.append(t)
-        
-    # points_3d = np.loadtxt("all_points.txt")
-    # print(len(points_3d))
-    # visualize_point_cloud(points_3d, r_list, t_list)
-    
-    # r_list = np.load("R_hat.npy")
-    # print(r_list.shape)
-    # print(r_list[0])
 
-    # t_list = np.load("t_hat.npy")
-    # points_3d = np.load("X_hat.npy")
-    
-    # visualize_point_cloud(points_3d, r_list, t_list)
     
     intrinsics = np.loadtxt("camera_intrinsic.txt")
-    # wrapped_up_visualize("/Users/husky/大三下/ComputerVision/Homeworks/Final/code/outputs/2024-05-04/20-57-39")
-    # wrapped_up_visualize("/Users/husky/大三下/ComputerVision/Homeworks/Final/code/outputs/2024-05-05/21-25-00")
-    ba_path = "/Users/husky/大三下/ComputerVision/Homeworks/Final/code/outputs/2024-05-05/main_thres=0.5/bundle_adjustment"
-    pnp_path = "/Users/husky/大三下/ComputerVision/Homeworks/Final/code/outputs/2024-05-05/main"
-    epi_ba_path = "/Users/husky/大三下/ComputerVision/Homeworks/Final/code/outputs/2024-05-07/20-53-59_epipolar_alg=ransac_match_thres=0.5_extract_contrast_thresh=0.001/bundle_adjustment"
-    epi_path = "/Users/husky/大三下/ComputerVision/Homeworks/Final/code/outputs/2024-05-07/20-53-59_epipolar_alg=ransac_match_thres=0.5_extract_contrast_thresh=0.001"
+
+    ba_path = "outputs/pnp_alg=magsac_match_thres=0.5_extract_contrast_thresh=0.001/bundle_adjustment"
+    pnp_path = "outputs/pnp_alg=magsac_match_thres=0.5_extract_contrast_thresh=0.001"
+    epi_ba_path = "outputs/epipolar_alg=ransac_match_thres=0.5_extract_contrast_thresh=0.001/bundle_adjustment"
+    epi_path = "outputs/epipolar_alg=ransac_match_thres=0.5_extract_contrast_thresh=0.001"
     
-    # wrapped_up_visualize("/Users/husky/大三下/ComputerVision/Homeworks/Final/code/outputs/2024-05-07/19-00-44_pnp_alg=magsac_match_thres=0.5_extract_contrast_thresh=0.001_edge_thresh=12")
-    
-     
-    # R_hat = np.load(os.path.join(ba_path, "R_hat.npy"))
-    # t_hat = np.load(os.path.join(ba_path, "t_hat.npy"))
-    
-    # for i in range(len(R_hat)):
-    #     save_r_t(R_hat[i], t_hat[i], os.path.join(ba_path, "camera_pose", f"{i+1:04}.txt"))
     
     r_list_1 = np.load(os.path.join(ba_path, "R_hat.npy"))
     t_list_1 = np.load(os.path.join(ba_path, "t_hat.npy"))
     
     r_list_2 = np.load(os.path.join(epi_path, "r_list.npy"))
-    t_list_2 = np.load(os.path.join(epi_path, "t_list.npy"))
-    
+    t_list_2 = np.load(os.path.join(epi_path, "t_list.npy"))  
     
     compare_cams(r_list_1, t_list_1, r_list_2, t_list_2)
     

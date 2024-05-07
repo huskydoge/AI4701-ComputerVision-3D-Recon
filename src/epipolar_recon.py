@@ -2,33 +2,20 @@
 Author: huskydoge hbh001098hbh@sjtu.edu.cn
 Date: 2024-04-30 22:21:33
 LastEditors: huskydoge hbh001098hbh@sjtu.edu.cn
-LastEditTime: 2024-05-06 20:08:54
+LastEditTime: 2024-05-07 21:32:40
 FilePath: /code/src/epipolar_recon.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
 
 import numpy as np
-import cv2
-import open3d as o3d
-from .feature_extraction import extract_features
-from .feature_matching import match_features
 import os
 from tqdm import tqdm
-from .utils import triangulate_points, save_r_t, visualize_point_cloud, print_colored, find_color_by_pair, get_format_result
+from .utils import save_r_t,  print_colored, find_color_by_pair, get_format_result
 from .initial_recon import CameraPoseEstimator
 
 def epipolar_recon(intrinsic_path = "camera_intrinsic.txt", save_dir = "output", **kargs):
       
     match_thres = kargs["match"].thres
-    tree = kargs["match"].tree
-    checks = kargs["match"].checks
-    flan_k = kargs["match"].flan_k
-    
-    K = np.loadtxt(intrinsic_path)
-    
-    contrast_thresh = kargs["extract"].contrast_thresh
-    edge_thresh = kargs["extract"].edge_thresh
-    sigma = kargs["extract"].sigma
     
     normalize = kargs["normalize_epi"]
     

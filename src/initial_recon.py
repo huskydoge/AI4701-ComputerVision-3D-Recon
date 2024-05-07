@@ -2,7 +2,7 @@
 Author: huskydoge hbh001098hbh@sjtu.edu.cn
 Date: 2024-04-11 17:00:40
 LastEditors: huskydoge hbh001098hbh@sjtu.edu.cn
-LastEditTime: 2024-05-07 14:14:13
+LastEditTime: 2024-05-07 21:33:34
 FilePath: /code/initial_recon.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -12,12 +12,10 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 
 import numpy as np
 import cv2
-import open3d as o3d
 from .feature_extraction import extract_features
 from .feature_matching import match_features
 import os
 from tqdm import tqdm
-from .utils import find_color_by_pair
 
 class CameraPoseEstimator:
     def __init__(self, intrinsic_path, alg = "ransac", save_dir = "output", **kargs):
@@ -115,10 +113,6 @@ class CameraPoseEstimator:
                 np.savetxt(os.path.join(pose_save_path, f"{save_name}.txt"), pose, fmt="%f")
                 continue
             
-            # get world camera's R, t
-            # world_pose = np.loadtxt(os.path.join(pose_save_path, f"{world_name}.txt"))
-            # world_R = world_pose[:3, :3]
-            # world_t = world_pose[:3, 3]
 
             img2 = cv2.imread(camera_path)
             world_id = world_cord_path.split("/")[-1].split(".")[0]
@@ -130,16 +124,13 @@ class CameraPoseEstimator:
             features1 = extract_features(img1, image_name=world_id, save_dir=self.save_dir, contrast_thresh=self.contrast_thresh, edge_thresh=self.edge_thresh, sigma = self.sigma)
             features2 = extract_features(img2, image_name=camera_id, save_dir=self.save_dir, contrast_thresh=self.contrast_thresh, edge_thresh=self.edge_thresh, sigma = self.sigma)
 
-            keypoints1, _, _ = features1
-            keypoints2, _, _ = features2
-
-            _, matches, points1, points2 = match_features(img1, img2, features1, features2, img_name=f"{world_name}-{save_name}", save_dir=self.save_dir, thres = self.match_thres, tree=self.tree, checks=self.checks, flan_k=self.flan_k, alg = self.match_alg, alg_params=self.match_alg_params)
+            _, _, points1, points2 = match_features(img1, img2, features1, features2, img_name=f"{world_name}-{save_name}", save_dir=self.save_dir, thres = self.match_thres, tree=self.tree, checks=self.checks, flan_k=self.flan_k, alg = self.match_alg, alg_params=self.match_alg_params)
             
   
             points1_ = np.float32([p.pt for p in points1])
             points2_ = np.float32([p.pt for p in points2])
 
-            F, E = self.find_fundamental_essential_matrices(points1_, points2_)
+            _, E = self.find_fundamental_essential_matrices(points1_, points2_)
             best_R, best_t = self.find_camera_pose(E, points1_, points2_, self.K)  # relevant R,t
             
 
@@ -151,7 +142,6 @@ class CameraPoseEstimator:
             pair_2D_3D_one = [(points1[i], points_3d[i]) for i in range(len(points_3d))] # 3D-2D pair for image 1
             pair_2D_3D_two = [(points2[i], points_3d[i]) for i in range(len(points_3d))] # 3D-2D pair for image 2
             
-            # pose = matrix.flatten().reshape(1, -1)
             pose = matrix
             poses.append(pose)
             np.savetxt(os.path.join(pose_save_path,f"{save_name}.txt"), pose, fmt='%f')
@@ -171,6 +161,4 @@ def init_recon(world_path = "images/0000.png", camera_paths = ["images/0000.png"
     np.savetxt(os.path.join(save_dir, "init_points_3d.txt"), points_3d, fmt='%f')
     
 
-if __name__ == "__main__":
-    
-    init_recon()
+

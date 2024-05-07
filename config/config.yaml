@@ -7,13 +7,13 @@ RECON_INIT:
   camera_paths: [images/0000.png, images/0001.png]
 
 RECON:
-  method: epipolar # pnp or epipolar
+  method: pnp # pnp or epipolar
   visualize: True
   merge_3d: False
   normalize_epi: True # whether scale the transition vector derived from epipolar, 否则会有尺度问题
 
 ESTIMATOR:
-  alg: ransac # ransac, magsac, use in findEssentialMat, findFundamentalMat, not in match
+  alg: magsac # ransac, magsac, use in findEssentialMat, findFundamentalMat, not in match
   ransac_params:
     ransacReprojThreshold: 0.1
     confidence: 0.99

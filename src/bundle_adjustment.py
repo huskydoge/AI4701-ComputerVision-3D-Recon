@@ -2,7 +2,7 @@
 Author: huskydoge hbh001098hbh@sjtu.edu.cn
 Date: 2024-04-29 20:37:30
 LastEditors: huskydoge hbh001098hbh@sjtu.edu.cn
-LastEditTime: 2024-05-06 20:09:14
+LastEditTime: 2024-05-07 21:32:33
 FilePath: /code/bundle_adjustment_scipy.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 
@@ -223,6 +223,6 @@ def bundle_adjustment(datapath, least_square_params = {"method": "trf", "ftol": 
     get_format_result(os.path.join(save_path, "p3d_hat.txt"), os.path.join(save_path,"pcolors.txt"), os.path.join(save_path, "camera_pose"), save_path)
 
 if __name__ == "__main__":
-    bundle_adjustment("output")
+    pass
 
     

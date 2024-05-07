@@ -2,7 +2,7 @@
 Author: huskydoge hbh001098hbh@sjtu.edu.cn
 Date: 2024-04-11 17:02:10
 LastEditors: huskydoge hbh001098hbh@sjtu.edu.cn
-LastEditTime: 2024-05-07 14:14:53
+LastEditTime: 2024-05-07 21:35:40
 FilePath: /code/pnp_recon.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE 
 '''
@@ -136,34 +136,6 @@ def use_pnp_recon(intrinsic_path = "camera_intrinsic.txt", save_dir = "output", 
 
     result_dict["0001"] = {"points_3d": points_3d, "pair_2D_3D": pair_2D_3D_two, "r": r_1, "t": t_1, "pcolor": pcolor}
     
-
-    # features1 = extract_features(img1, image_name="0001", save_dir=save_dir, contrast_thresh=contrast_thresh, edge_thresh=edge_thresh, sigma=sigma)
-    # features2 = extract_features(img2, image_name="0002", save_dir=save_dir, contrast_thresh=contrast_thresh, edge_thresh=edge_thresh, sigma=sigma)
-
-    # _, _, points1, points2 = match_features(img1, img2, features1, features2, img_name="0001-0002", thres=match_thres, save_dir=save_dir, tree=tree, checks=checks, flan_k=flan_k)
-    
-    # # camera_paths = sorted(camera_paths, key=lambda x: int(x.split("/")[-1].split(".")[0]))
-    # pnp = PnP(img1, img2, pair_2D_3D_two, points1, points2, K = K)
-    
-    # _, r_2, t_2, pair_2 = pnp.get_pose_and_3d_points() # the r and t of 0002 camera
-    
-    # save_r_t(r_2, t_2, os.path.join(pose_save_path, "0002.txt"))
-    
-    # result_dict["0001"]["r"] = r_1
-    # result_dict["0001"]["t"] = t_1
-
-    
-    # points_3d_2, pair_2D_3D_one, pair_2D_3D_two = triangulate_points(K, K, points1, points2, r_1, t_1, r_2, t_2)
-    
-    # # merge the pair from PnP and traiangulate locating
-
-    # # pair_2D_3D_two = pair_2D_3D_two + pair_2
-    
-    # pcolor = find_color_by_pair(img2, pair_2D_3D_two, os.path.join(color_save_path, f"0002_color.npy"))
-    
-    # result_dict["0002"] = {"points_3d": points_3d_2, "pair_2D_3D": pair_2D_3D_two, "r": r_2, "t": t_2, "pcolor": pcolor}
-    
-    
     for i in tqdm(range(1, 10), total = 8, desc="processing img pairs"): # 2,..9, (i, i + 1), for each i, we have its 3D-2D pair, then we match the image i and i + 1, find the 3D-2D pair for i + 1, as well as the r and t for i + 1
         img1 = f"images/{i:04}.png"
         img2 = f"images/{i+1:04}.png"
@@ -185,6 +157,10 @@ def use_pnp_recon(intrinsic_path = "camera_intrinsic.txt", save_dir = "output", 
         
         result_dict[f"{i+1:04}"] = {"points_3d": points_3d_2, "pair_2D_3D": pair_2D_3D_two, "r": r, "t": t, "pcolor": pcolor}
     
+    
+    # the code below is try to test whether add more match by using different step in these pair could help, (i, i + 2) / (i, i + 3)
+    # Not used in practice, but keeped here for future reference
+    """
     for i in tqdm(range(1,9)):
         break
         img1 = f"images/{i:04}.png"
@@ -237,7 +213,7 @@ def use_pnp_recon(intrinsic_path = "camera_intrinsic.txt", save_dir = "output", 
         result_dict[f"{i+3:04}"]["points_3d"] = np.concatenate((result_dict[f"{i+3:04}"]["points_3d"], points_3d_2), axis=0)
         result_dict[f"{i+3:04}"]["pcolor"] = np.concatenate((result_dict[f"{i+3:04}"]["pcolor"], pcolor), axis=0)
         print("after", len(result_dict[f"{i+3:04}"]["points_3d"]))
-
+    """
         
     # collect 3d points
     all_points = []
@@ -247,7 +223,6 @@ def use_pnp_recon(intrinsic_path = "camera_intrinsic.txt", save_dir = "output", 
         pcolors.extend(result_dict[key]["pcolor"])
         
 
-        
     for key in result_dict.keys():
         item = result_dict[key]
         item["pair_2D_3D"] = [(get_pos(t), k) for (t,k) in item["pair_2D_3D"]]
@@ -268,8 +243,7 @@ def use_pnp_recon(intrinsic_path = "camera_intrinsic.txt", save_dir = "output", 
     pcolors = np.array(pcolors_filtered)
     
 
-            
-    
+        
     r_list = []
     t_list = []
     for pose in os.listdir(pose_save_path):
@@ -292,38 +266,3 @@ def use_pnp_recon(intrinsic_path = "camera_intrinsic.txt", save_dir = "output", 
     
     return r_list, t_list, all_points, result_dict
 
-
-
-if __name__ == "__main__":
-    intrinsic_path = "camera_intrinsic.txt"
-    
-    K = np.loadtxt(intrinsic_path)
-    
-    path1 = "images/0001.png"
-    path2 = "images/0002.png"
-    img1 = cv2.imread(path1)
-    img2 = cv2.imread(path2)
-    features1 = extract_features(img1, image_name="0001")
-    features2 = extract_features(img2, image_name="0002")
-    
-    keypoints1, _, _ = features1
-    keypoints2, _, _ = features2
-    
-    _, matches, points1, points2 = match_features(img1, img2, features1, features2)
-    
-    matches = [m for m,_ in matches]
-    
-    estimator = CameraPoseEstimator(intrinsic_path)
-    
-    world_path = "images/0000.png"
-    
-    camera_paths = ["images/0001.png"] # init recon with 2 images
-    # camera_paths = sorted(camera_paths, key=lambda x: int(x.split("/")[-1].split(".")[0]))
-    
-    poses, points_3d, pair_2D_3D_one, pair_2D_3D_two = estimator.get_pose_and_3d_points(world_path, camera_paths)
-
-    pnp = PnP(img1, img2, pair_2D_3D_two, points1, points2, K = K)
-    
-
-    s, r, t = pnp.get_pose_and_3d_points()
-    

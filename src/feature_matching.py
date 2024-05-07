@@ -6,18 +6,16 @@ RanSac算法进行特征匹配
 Author: huskydoge hbh001098hbh@sjtu.edu.cn
 Date: 2024-04-11 16:59:11
 LastEditors: huskydoge hbh001098hbh@sjtu.edu.cn
-LastEditTime: 2024-05-07 17:04:32
+LastEditTime: 2024-05-07 21:33:07
 FilePath: /code/feature_matching.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
 import cv2
 from .feature_extraction import extract_features
-from matplotlib import pyplot as plt
 import time
 import os
 import numpy as np
 from typing import List
-from typing import Optional, Literal, List
 from .utils import print_colored
 
 def match_features(img1, img2, features1, features2, img_name = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), 
@@ -56,7 +54,7 @@ def match_features(img1, img2, features1, features2, img_name = time.strftime("%
     keypoints2, descriptors2, _ = features2
     
     # Create FLANN matcher object
-    FLANN_INDEX_KDTREE = 1 # 建立FLANN匹配器的参数
+    FLANN_INDEX_KDTREE = 1 
     index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=tree)
     search_params = dict(checks=checks)  # or pass empty dictionary
 
@@ -142,27 +140,6 @@ def match_features(img1, img2, features1, features2, img_name = time.strftime("%
     return img_matches, good_matches, points1, points2
 
 
-if __name__ == "__main__":
-    
 
-    # Example of loading images and using the functions
-    path1 = 'images/0000.png'  # Replace with the path to your first image
-    path2 = 'images/0001.png'  # Replace with the path to your second image
-
-    img1 = cv2.imread(path1)  # Load the first image in grayscale
-    img2 = cv2.imread(path2)  # Load the second image in grayscale
-
-
-    if img1 is None or img2 is None:
-        raise ValueError("One of the images didn't load correctly. Check the paths.")
-
-    # Extract features
-    features1 = extract_features(img1, image_name="0000")
-    features2 = extract_features(img2, image_name="0001")
-
-    # Match features and visualize
-    img_matches = match_features(img1, img2, features1, features2, img_name="0000-0001")
-    
-    print(len(img_matches))
 
 
