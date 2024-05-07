@@ -1,11 +1,12 @@
 <!--
+
  * @Author: huskydoge hbh001098hbh@sjtu.edu.cn
  * @Date: 2024-04-30 21:14:14
  * @LastEditors: huskydoge hbh001098hbh@sjtu.edu.cn
- * @LastEditTime: 2024-05-07 21:49:41
+ * @LastEditTime: 2024-05-07 23:21:23
  * @FilePath: /code/README.md
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
+   -->
 
 # AI4701-ComputerVision-3D-Recon Final Project
 
@@ -78,6 +79,8 @@ BA:
 - `utils.py`: 工具
 
 `outputs/` : 输出路径
+
+`view/view.json` ：**ctrl + C 复制之后，当 o3d 窗口出现时，ctrl + V 移动到固定视角**
 
 ---
 
