@@ -1,6 +1,6 @@
-/.DS_Store
+.DS_Store
 /.conda
 /.lh
 /RenderOption_2024-04-30-20-40-23.json
-/__pycache__
+*/__pycache__/*
 /outputs
