@@ -2,7 +2,7 @@
 Author: huskydoge hbh001098hbh@sjtu.edu.cn
 Date: 2024-04-19 19:18:47
 LastEditors: huskydoge hbh001098hbh@sjtu.edu.cn
-LastEditTime: 2024-05-07 21:38:37
+LastEditTime: 2024-05-07 22:48:18
 FilePath: /code/utils.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -278,11 +278,17 @@ def get_diff_between_cameras(path1, path2):
 
     camera_list_1 = []
     camera_list_2 = []
-    for cam in os.listdir(path1):
+    p1 = os.listdir(path1)
+    p2 = os.listdir(path2)
+    p1 = sorted(p1, key = lambda x: int(x.split(".")[0]))
+    p2 = sorted(p2, key = lambda x: int(x.split(".")[0]))
+    
+    for cam in p1:
         if cam.split(".")[-1] == "txt":
             tmp = np.loadtxt(os.path.join(path1, cam))
             camera_list_1.append(tmp)
-    for cam in os.listdir(path2):
+            
+    for cam in p2:
         if cam.split(".")[-1] == "txt":
             tmp = np.loadtxt(os.path.join(path2, cam))
             camera_list_2.append(tmp)
@@ -290,7 +296,6 @@ def get_diff_between_cameras(path1, path2):
     camera_list_2 = np.array(camera_list_2)
     diff = np.linalg.norm(camera_list_1 - camera_list_2)
     print("3 * 4 norm diff: ", diff)
-
 
     rotation_diffs = []
     angular_diffs = []
@@ -301,7 +306,7 @@ def get_diff_between_cameras(path1, path2):
 
         rotation_diff = cam_1[:3, :3] @ cam_2[:3, :3].T
 
-        rotation_diffs.append(np.linalg.norm(rotation_diff - np.eye(3,3) / np.linalg.norm(np.eye(3,3))))
+        rotation_diffs.append(np.linalg.norm((rotation_diff - np.eye(3,3)) / np.linalg.norm(np.eye(3,3))))
         
         trace = np.clip(np.trace(rotation_diff), - np.inf, 3)
         angular_distance = np.rad2deg(np.arccos((trace - 1.) / 2.))
@@ -339,7 +344,7 @@ def get_diff_between_cameras(path1, path2):
     plt.tight_layout()  # Adjust layout to prevent overlap
     plt.show()
 
-    
+
 def compare_cams(r_list_1, t_list_1, r_list_2, t_list_2):
     
     vis = o3d.visualization.Visualizer()
